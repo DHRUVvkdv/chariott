@@ -48,6 +48,11 @@ async def read_root():
     return {"message": "Hello World"}
 
 
+@app.get("/test")
+async def read_root():
+    return {"message": "Mike does it work?"}
+
+
 if __name__ == "__main__":
     import uvicorn
 
