@@ -1,0 +1,5 @@
+fastapi
+starlette
+pydantic-settings
+mangum
+uvicorn
