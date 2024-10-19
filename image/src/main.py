@@ -5,7 +5,7 @@ from middleware.auth import AuthMiddleware
 from fastapi.openapi.utils import get_openapi
 from mangum import Mangum
 import logging
-from api.endpoints import document
+from api.endpoints import document, auth
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,9 +16,9 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Teaching Asssistant",
+        title="Chariott API",
         version="1.0.0",
-        description="API for the Teaching Assistant application",
+        description="API for the Chariott Hospitality and Travel application",
         routes=app.routes,
     )
     openapi_schema["components"]["securitySchemes"] = {
@@ -32,14 +32,7 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
-allowed_origins = [
-    "http://localhost:3000",
-    "https://main.d2gakz683sax2c.amplifyapp.com",
-]
-
-
-app.add_middleware(AuthMiddleware)
-
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(document.router, prefix="/api/documents", tags=["documents"])
 
 handler = Mangum(app)

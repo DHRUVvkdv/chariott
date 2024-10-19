@@ -1,0 +1,27 @@
+codefest-backend-infra/
+├── app/
+│   ├── api/
+│   │   ├── endpoints/
+│   │   │   ├── __init__.py
+│   │   │   ├── document.py
+│   │   └── __init__.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   └── config.py
+|   |   └── s3_client.py 
+│   ├── middleware/
+│   │   ├── __init__.py
+│   │   └── auth.py
+│   ├── schemas/  # New directory for Pydantic models
+│   │   ├── __init__.py
+│   │   └── document.py
+│   ├── services/  # New directory for business logic
+│   │   ├── __init__.py
+│   │   ├── s3_service.py
+│   │   └── user_service.py
+│   └── main.py
+├── .env
+├── .gitignore
+├── Dockerfile
+├── requirements.txt
+└── README.md
