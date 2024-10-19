@@ -3,3 +3,6 @@ starlette
 pydantic-settings
 mangum
 uvicorn
+python-multipart
+boto3
+python-dotenv
