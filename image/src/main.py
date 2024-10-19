@@ -52,6 +52,11 @@ async def read_root():
     return Response(status_code=302, headers={"Location": "/docs"})
 
 
+@app.get("/test")
+async def read_test():
+    return {"message": "hello world"}
+
+
 if __name__ == "__main__":
     import uvicorn
 
