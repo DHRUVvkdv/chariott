@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from middleware.auth import AuthMiddleware
@@ -27,7 +27,7 @@ handler = Mangum(app)
 
 @app.get("/")
 async def read_root():
-    return {"message": "Hello World"}
+    return Response(status_code=302, headers={"Location": "/docs"})
 
 
 if __name__ == "__main__":
