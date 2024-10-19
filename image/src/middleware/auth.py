@@ -1,16 +1,21 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
+from core.config import settings
+
+API_KEY = settings.API_KEY
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Implement your authentication logic here
-        # For example, check for a valid JWT token in the headers
-
-        # If authentication fails, return a 401 Unauthorized response
-        # return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
-
-        # If authentication succeeds, proceed with the request
-        response = await call_next(request)
-        return response
+        if request.url.path in [
+            "/docs",
+            "/openapi.json",
+        ]:  # Skip authentication for Swagger docs
+            return await call_next(request)
+        api_key = request.headers.get("API-Key")
+        if api_key != API_KEY:
+            return JSONResponse(
+                status_code=403, content={"detail": "Could not validate credentials"}
+            )
+        return await call_next(request)
