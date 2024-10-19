@@ -12,3 +12,16 @@ aws lambda update-function-url-config \
 "AllowCredentials": true,
 "MaxAge": 300
 }'
+
+aws lambda get-function-url-config \
+ --function-name CodefestBackendInfraStack-ApiFunctionCE271BD4-xrpFQqE6RoMd
+
+aws lambda update-function-url-config \
+ --function-name CodefestBackendInfraStack-ApiFunctionCE271BD4-xrpFQqE6RoMd \
+ --cors '{
+"AllowOrigins": [],
+"AllowMethods": [],
+"AllowHeaders": [],
+"AllowCredentials": false,
+"MaxAge": 0
+}'
