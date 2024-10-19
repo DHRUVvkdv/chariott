@@ -37,7 +37,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
       code: lambda.DockerImageCode.fromImageAsset('../image', {
         cmd: ["main.handler"]
       }),
-      memorySize: 256,
+      memorySize: 512,
       timeout: cdk.Duration.seconds(60),
       architecture: lambda.Architecture.ARM_64,
       environment: {
