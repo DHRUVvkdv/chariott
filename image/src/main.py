@@ -32,13 +32,11 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+allowed_origins = [
+    "http://localhost:3000",
+    "https://main.d2gakz683sax2c.amplifyapp.com",
+]
+
 
 app.add_middleware(AuthMiddleware)
 
