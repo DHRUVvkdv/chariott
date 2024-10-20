@@ -8,6 +8,7 @@ from fastapi import (
     Depends,
     Request,
     Query,
+    Body,
 )
 from typing import List
 from services.s3_service import upload_file_to_s3
@@ -24,8 +25,24 @@ from schemas.document import (
     DocumentListResponse,
     DocumentResponse,
 )
+from core.config import settings
 from schemas.user import User
 from middleware.auth import get_current_user
+
+# import boto3
+from services.rag_service import RAGService
+from services.rag_interaction_service import RagInteractionService
+from schemas.rag_interaction import RagInteractionCreate, ResponseType
+from services.pinecone_service import delete_document_vectors
+
+# boto3.setup_default_session(
+#     aws_access_key_id=settings.PRIVATE_AWS_SECRET_ACCESS_KEY,
+#     aws_secret_access_key=settings.PRIVATE_AWS_SECRET_ACCESS_KEY,
+#     region_name=settings.PRIVATE_AWS_REGION,  # replace with your preferred region
+# )
+# boto3.setup_default_session(
+#     region_name=settings.PRIVATE_AWS_REGION,  # replace with your preferred region
+# )
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -100,6 +117,28 @@ async def get_document(
     return DocumentResponse(**document)
 
 
+# rag_service = RAGService()
+
+
+# @router.post("/chat")
+# async def chat(
+#     query: str = Body(..., embed=True),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     response = await rag_service.chat(query)
+
+#     # Store the interaction
+#     interaction = RagInteractionCreate(
+#         user_id=current_user.user_id,
+#         user_query=query,
+#         response_type=ResponseType.TEXT,  # Use the enum value directly
+#         response_content=response,
+#     )
+#     await RagInteractionService.create_interaction(interaction)
+
+#     return {"response": response}
+
+
 @router.delete("/documents/{document_id}", status_code=204)
 async def delete_document_endpoint(
     document_id: str, current_user: User = Depends(get_current_user)
@@ -111,5 +150,14 @@ async def delete_document_endpoint(
         raise HTTPException(
             status_code=403, detail="Not authorized to delete this document"
         )
+
+    # Delete the document from your database
     await delete_document(document_id)
+
+    # Delete the associated vectors from Pinecone
+    delete_response = await delete_document_vectors(document_id)
+
+    # You might want to log the delete_response or handle any errors
+    logger.info(f"Deleted vectors for document {document_id}: {delete_response}")
+
     return None

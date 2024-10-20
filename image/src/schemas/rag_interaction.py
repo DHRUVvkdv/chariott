@@ -8,6 +8,7 @@ from uuid import uuid4
 class ResponseType(str, Enum):
     RAG = "RAG"
     FUNCTION_CALL = "FUNCTION_CALL"
+    TEXT = "TEXT"  # Add this new type
 
 
 class RagInteraction(BaseModel):
@@ -28,3 +29,6 @@ class RagInteractionCreate(BaseModel):
     response_content: str
     sources: Optional[List[str]] = None
     success: bool = True
+
+    class Config:
+        use_enum_values = True  # This allows passing string values for enums

@@ -5,6 +5,7 @@ from services.embedding_service import generate_embeddings
 from services.pinecone_service import store_embeddings
 from services.dynamodb_service import update_document_status
 import tempfile
+import os
 
 
 async def process_document(document_id: str, s3_url: str, user_id: str):
@@ -24,7 +25,7 @@ async def process_document(document_id: str, s3_url: str, user_id: str):
     text_content = "\n".join([page.page_content for page in pages])
 
     # 5. Chunk document
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=120)
     chunks = text_splitter.split_text(text_content)
 
     # 6. Generate embeddings
@@ -35,7 +36,11 @@ async def process_document(document_id: str, s3_url: str, user_id: str):
         document_id,
         embeddings,
         metadata={"s3_url": s3_url, "document_id": document_id, "user_id": user_id},
+        texts=chunks,  # Pass the text chunks here
     )
 
     # 8. Update document status in DynamoDB
     await update_document_status(document_id, "completed", s3_url, user_id)
+
+    # 9. Clean up the temporary file
+    os.unlink(temp_file_path)

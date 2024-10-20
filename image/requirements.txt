@@ -12,3 +12,4 @@ pinecone
 pypdf
 langchain-community
 pytz
+langchain-aws

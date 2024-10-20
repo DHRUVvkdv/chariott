@@ -8,6 +8,7 @@ from mangum import Mangum
 import logging
 from api.endpoints import booking
 from api.endpoints import hotel, rag_interaction
+from api.endpoints import vector
 
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +43,7 @@ app.include_router(request.router, prefix="/api/requests", tags=["requests"])
 app.include_router(booking.router, prefix="/api/bookings", tags=["bookings"])
 app.include_router(hotel.router, prefix="/api/hotels", tags=["hotels"])
 app.include_router(rag_interaction.router, prefix="/api/rag", tags=["rag"])
+app.include_router(vector.router, prefix="/api/vector", tags=["vectors"])
 
 
 handler = Mangum(app)
