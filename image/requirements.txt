@@ -13,3 +13,4 @@ pypdf
 langchain-community
 pytz
 langchain-aws
+scikit-learn

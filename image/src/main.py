@@ -9,11 +9,19 @@ import logging
 from api.endpoints import booking
 from api.endpoints import hotel, rag_interaction
 from api.endpoints import vector
+from services.agent_manager import AgentManager
+from api.endpoints import top_user_recommendations
 
 
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+agent_manager = AgentManager()
+
+
+def get_agent_manager():
+    return agent_manager
 
 
 def custom_openapi():
@@ -44,6 +52,11 @@ app.include_router(booking.router, prefix="/api/bookings", tags=["bookings"])
 app.include_router(hotel.router, prefix="/api/hotels", tags=["hotels"])
 app.include_router(rag_interaction.router, prefix="/api/rag", tags=["rag"])
 app.include_router(vector.router, prefix="/api/vector", tags=["vectors"])
+app.include_router(
+    top_user_recommendations.router,
+    prefix="/api/top_user_recommendations",
+    tags=["top_user_recommendations"],
+)
 
 
 handler = Mangum(app)
