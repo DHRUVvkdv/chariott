@@ -100,15 +100,76 @@ class UserService:
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
         users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
 
+        cognito_deleted = False
+        dynamodb_deleted = False
+
         try:
-            # Delete user from Cognito
+            # Try to delete user from Cognito
             cognito_client.admin_delete_user(
                 UserPoolId=settings.COGNITO_USER_POOL_ID, Username=user_id
             )
+            cognito_deleted = True
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "UserNotFoundException":
+                raise HTTPException(status_code=400, detail=str(e))
 
-            # Delete user from DynamoDB
-            dynamodb_response = users_table.delete_item(Key={"user_id": user_id})
-
-            return {"message": f"User {user_id} deleted successfully"}
+        try:
+            # Try to delete user from DynamoDB
+            dynamodb_response = users_table.delete_item(
+                Key={"user_id": user_id}, ReturnValues="ALL_OLD"
+            )
+            if "Attributes" in dynamodb_response:
+                dynamodb_deleted = True
         except ClientError as e:
             raise HTTPException(status_code=400, detail=str(e))
+
+        if cognito_deleted or dynamodb_deleted:
+            return {"message": f"User {user_id} deleted successfully"}
+        else:
+            raise HTTPException(
+                status_code=404, detail="User not found in either Cognito or DynamoDB"
+            )
+
+    @staticmethod
+    async def get_user(user_id: str) -> UserInDB:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+
+        try:
+            response = users_table.get_item(Key={"user_id": user_id})
+            user = response.get("Item")
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+            return UserInDB(**user)
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def get_all_staff() -> List[UserInDB]:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+
+        try:
+            response = users_table.scan(
+                FilterExpression="user_type = :user_type",
+                ExpressionAttributeValues={":user_type": UserType.STAFF.value},
+            )
+            users = response.get("Items", [])
+            return [UserInDB(**user) for user in users]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def get_all_normal() -> List[UserInDB]:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+
+        try:
+            response = users_table.scan(
+                FilterExpression="user_type = :user_type",
+                ExpressionAttributeValues={":user_type": UserType.NORMAL.value},
+            )
+            users = response.get("Items", [])
+            return [UserInDB(**user) for user in users]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
