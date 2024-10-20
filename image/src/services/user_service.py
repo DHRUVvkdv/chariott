@@ -47,6 +47,7 @@ class UserService:
             # Create user entry in DynamoDB
             dynamodb_item = user.dict(exclude={"password"})
             dynamodb_item["user_id"] = user.email  # Use email as user_id
+            dynamodb_item["interaction_counter"] = 0
             if user.user_type == UserType.STAFF:
                 dynamodb_item["staff_type"] = user.staff_type.value
 
@@ -171,5 +172,21 @@ class UserService:
             )
             users = response.get("Items", [])
             return [UserInDB(**user) for user in users]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def increment_interaction_counter(user_id: str):
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.update_item(
+                Key={"user_id": user_id},
+                UpdateExpression="SET interaction_counter = if_not_exists(interaction_counter, :start) + :inc",
+                ExpressionAttributeValues={":inc": 1, ":start": 0},
+                ReturnValues="UPDATED_NEW",
+            )
+            return response["Attributes"]["interaction_counter"]
         except ClientError as e:
             raise HTTPException(status_code=500, detail=str(e))

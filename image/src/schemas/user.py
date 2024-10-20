@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, validator, Field
+from pydantic import BaseModel, EmailStr, validator, Field, model_validator
 from enum import Enum
-from typing import Optional
+from typing import Optional, List, Dict
 
 
 class UserType(str, Enum):
@@ -15,6 +15,48 @@ class StaffType(str, Enum):
     MANAGER = "manager"
 
 
+class DietaryRestriction(str, Enum):
+    VEGAN = "vegan"
+    VEGETARIAN = "vegetarian"
+    OTHER = "other"
+
+
+class MattressType(str, Enum):
+    ANY = "any"
+    MEMORY_FOAM = "memory foam"
+    SPRING = "spring"
+    MEDIUM = "medium"
+    HARD = "hard"
+
+
+class PillowType(str, Enum):
+    ANY = "any"
+    FEATHER = "feather"
+    MEMORY = "memory"
+    MICROFIBER = "microfiber"
+    DOWN = "down"
+
+
+class RoomView(str, Enum):
+    CITY = "city"
+    GARDEN = "garden"
+    POOL = "pool"
+    ANY = "any"
+
+
+class Preferences(BaseModel):
+    dietary_restrictions: DietaryRestriction = DietaryRestriction.OTHER
+    dietary_restrictions_other: Optional[str] = None
+    bedding_pillows: int = Field(default=2, ge=0, le=5)
+    bedding_mattress_type: MattressType = MattressType.ANY
+    bedding_pillow_type: PillowType = PillowType.ANY
+    bedding_other: Optional[str] = None
+    climate_control: str = "Temperature set to 75°F"
+    room_view: RoomView = RoomView.ANY
+    quiet_room: bool = False
+    misc: Optional[str] = None
+
+
 class UserBase(BaseModel):
     user_id: str
     email: EmailStr
@@ -22,13 +64,30 @@ class UserBase(BaseModel):
     last_name: str
 
 
+class User(UserBase):
+    user_type: UserType
+    staff_type: Optional[StaffType] = None
+    preferences: Preferences = Field(default_factory=Preferences)
+    recommendations: List[str] = []
+    interaction_counter: int = 0
+
+    @model_validator(mode="after")
+    def validate_staff_type(self):
+        if self.user_type == UserType.STAFF and self.staff_type is None:
+            raise ValueError("staff_type is required for staff users")
+        if self.user_type == UserType.NORMAL:
+            self.staff_type = None  # Always set staff_type to None for normal users
+        return self
+
+
 class UserCreate(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
     password: str
-    user_type: UserType
+    user_type: UserType = UserType.NORMAL
     staff_type: Optional[StaffType] = None
+    preferences: Preferences = Field(default_factory=Preferences)
 
     @validator("staff_type")
     def validate_staff_type(cls, v, values):
@@ -39,17 +98,10 @@ class UserCreate(BaseModel):
         return v
 
 
-class UserInDB(UserBase):
-    user_type: UserType
-    staff_type: Optional[StaffType] = None
+class UserInDB(User):
+    hashed_password: Optional[str] = None
 
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-
-# Add this new class
-class User(UserBase):
-    user_type: UserType
-    staff_type: Optional[StaffType] = None

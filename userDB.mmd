@@ -1,0 +1,26 @@
+classDiagram
+    class UserTable {
+        +string user_id (Partition Key)
+        +string email
+        +string first_name
+        +string last_name
+        +string user_type
+        +string staff_type
+        +map preferences
+        +list recommendations
+        +number interaction_counter
+        +string hashed_password
+    }
+    class Preferences {
+        +string dietary_restrictions
+        +string dietary_restrictions_other
+        +number bedding_pillows
+        +string bedding_mattress_type
+        +string bedding_pillow_type
+        +string bedding_other
+        +string climate_control
+        +string room_view
+        +boolean quiet_room
+        +string misc
+    }
+    UserTable -- Preferences : contains

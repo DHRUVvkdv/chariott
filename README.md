@@ -25,3 +25,7 @@ aws lambda update-function-url-config \
 "AllowCredentials": false,
 "MaxAge": 0
 }'
+
+npm install -g @mermaid-js/mermaid-cli
+mmdc -i userDB.mmd -o diagram.svg
+mmdc -i userDB.mmd -o diagram.png
