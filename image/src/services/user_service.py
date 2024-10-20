@@ -2,7 +2,14 @@ import boto3
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
 from core.config import settings
-from schemas.user import UserCreate, UserLogin, UserType, StaffType, UserInDB
+from schemas.user import (
+    UserCreate,
+    UserLogin,
+    UserType,
+    StaffType,
+    UserInDB,
+    Preferences,
+)
 from typing import List
 
 
@@ -63,6 +70,12 @@ class UserService:
 
     @staticmethod
     async def login_user(user: UserLogin):
+        result = await UserService._original_login_user(user)
+        await UserService.increment_interaction_counter(user.email)
+        return result
+
+    @staticmethod
+    async def _original_login_user(user: UserLogin):
         cognito_client = boto3.client(
             "cognito-idp",
             region_name=settings.PRIVATE_AWS_REGION,
@@ -188,5 +201,56 @@ class UserService:
                 ReturnValues="UPDATED_NEW",
             )
             return response["Attributes"]["interaction_counter"]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def update_preferences(user_id: str, preferences: Preferences):
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.update_item(
+                Key={"user_id": user_id},
+                UpdateExpression="SET preferences = :preferences",
+                ExpressionAttributeValues={":preferences": preferences.dict()},
+                ReturnValues="UPDATED_NEW",
+            )
+            await UserService.increment_interaction_counter(user_id)
+            return response["Attributes"]["preferences"]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def get_preferences(user_id: str) -> Preferences:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.get_item(Key={"user_id": user_id})
+            user = response.get("Item")
+            if not user or "preferences" not in user:
+                raise HTTPException(
+                    status_code=404, detail="User or preferences not found"
+                )
+            await UserService.increment_interaction_counter(user_id)
+            return Preferences(**user["preferences"])
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def get_interaction_counter(user_id: str) -> int:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.get_item(Key={"user_id": user_id})
+            user = response.get("Item")
+            if not user or "interaction_counter" not in user:
+                raise HTTPException(
+                    status_code=404, detail="User or interaction counter not found"
+                )
+            await UserService.increment_interaction_counter(user_id)
+            return user["interaction_counter"]
         except ClientError as e:
             raise HTTPException(status_code=500, detail=str(e))
