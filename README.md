@@ -29,3 +29,5 @@ aws lambda update-function-url-config \
 npm install -g @mermaid-js/mermaid-cli
 mmdc -i userDB.mmd -o diagram.svg
 mmdc -i userDB.mmd -o diagram.png
+
+cdk synth?

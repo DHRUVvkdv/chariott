@@ -48,6 +48,10 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!DYNAMODB_TABLE_NAME_PROCESSED_FILES) {
       throw new Error("DYNAMODB_TABLE_NAME_PROCESSED_FILES environment variable is not set");
     }
+    const DYNAMODB_TABLE_NAME_REQUESTS = process.env.DYNAMODB_TABLE_NAME_REQUESTS;
+    if (!DYNAMODB_TABLE_NAME_REQUESTS) {
+      throw new Error("DYNAMODB_TABLE_NAME_REQUESTS environment variable is not set");
+    }
     const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
     if (!PINECONE_API_KEY) {
       throw new Error("PINECONE_API_KEY environment variable is not set");
@@ -78,6 +82,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         DYNAMODB_TABLE_NAME_PROCESSED_FILES,
         PINECONE_API_KEY,
         PINECONE_INDEX_NAME,
+        DYNAMODB_TABLE_NAME_REQUESTS
       },
     });
 
@@ -91,6 +96,24 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     
         const table_processed_files = dynamodb.Table.fromTableName(this, 'ProcessedFilesTable', DYNAMODB_TABLE_NAME_PROCESSED_FILES);
         table_processed_files.grantReadWriteData(apiFunction);
+
+        const table_requests = dynamodb.Table.fromTableName(this, 'RequestsTable', DYNAMODB_TABLE_NAME_REQUESTS);
+        table_requests.grantReadWriteData(apiFunction);
+
+
+            // Grant additional permissions for GSI querying
+    apiFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'dynamodb:Query',
+        'dynamodb:Scan'
+      ],
+      resources: [
+        `${table_requests.tableArn}/index/*`,
+        `${table_users.tableArn}/index/*`,
+        `${table_processed_files.tableArn}/index/*`
+      ]
+    }));
 
     // Add a function URL to the Lambda
     const functionUrl = apiFunction.addFunctionUrl({

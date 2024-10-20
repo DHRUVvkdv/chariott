@@ -62,6 +62,7 @@ class Preferences(BaseModel):
     room_view: RoomView = RoomView.ANY
     quiet_room: bool = False
     misc: Optional[str] = None
+    econ_rating: int = Field(default=0, ge=0, le=10)  # Added econ_rating field
 
 
 class UserBase(BaseModel):

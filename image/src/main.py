@@ -1,12 +1,11 @@
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
-from api.endpoints import user
+from api.endpoints import user, document, request
 from middleware.auth import AuthMiddleware
 from fastapi.openapi.utils import get_openapi
 from mangum import Mangum
 import logging
-from api.endpoints import document
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,6 +35,7 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(user.router, prefix="/api/auth", tags=["auth"])
 app.include_router(document.router, prefix="/api/documents", tags=["documents"])
+app.include_router(request.router, prefix="/api/requests", tags=["requests"])
 
 handler = Mangum(app)
 

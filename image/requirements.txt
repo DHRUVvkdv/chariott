@@ -11,3 +11,4 @@ langchain
 pinecone
 pypdf
 langchain-community
+pytz

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     API_KEY: str
     PINECONE_API_KEY: str
     PINECONE_INDEX_NAME: str
+    DYNAMODB_TABLE_NAME_REQUESTS: str
 
     class Config:
         env_file = ".env"
