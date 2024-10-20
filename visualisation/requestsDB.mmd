@@ -1,0 +1,13 @@
+erDiagram
+    REQUESTS {
+        string request_id PK
+        string user_id
+        string hotel_id
+        enum department
+        string task
+        datetime time_issued
+        datetime time_completed
+        enum status
+    }
+    REQUESTS ||--o{ USERS : "created by"
+    REQUESTS ||--o{ HOTELS : "associated with"

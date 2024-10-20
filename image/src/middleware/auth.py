@@ -4,7 +4,7 @@ from fastapi.security import APIKeyHeader
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from core.config import settings
-from schemas.user import User, UserType, StaffType
+from schemas.user import User, UserType, StaffType, LoyaltyProgram
 from botocore.exceptions import ClientError
 
 API_KEY = settings.API_KEY
@@ -55,6 +55,7 @@ async def get_current_user(request: Request) -> User:
             first_name="Default",
             last_name="User",
             user_type=UserType.NORMAL,
+            loyalty_program=LoyaltyProgram.BRONZE,  # Add this line
         )
 
     # Convert DynamoDB data to User object
@@ -62,6 +63,9 @@ async def get_current_user(request: Request) -> User:
     staff_type = (
         StaffType(user_data.get("staff_type")) if user_data.get("staff_type") else None
     )
+    loyalty_program = LoyaltyProgram(
+        user_data.get("loyalty_program", LoyaltyProgram.BRONZE)
+    )  # Add this line
 
     return User(
         user_id=user_data["user_id"],
@@ -70,6 +74,7 @@ async def get_current_user(request: Request) -> User:
         last_name=user_data["last_name"],
         user_type=user_type,
         staff_type=staff_type,
+        loyalty_program=loyalty_program,  # Add this line
     )
 
 
