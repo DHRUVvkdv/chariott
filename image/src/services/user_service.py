@@ -2,7 +2,8 @@ import boto3
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
 from core.config import settings
-from schemas.user import UserCreate, UserLogin, UserType, StaffType
+from schemas.user import UserCreate, UserLogin, UserType, StaffType, UserInDB
+from typing import List
 
 
 class UserService:
@@ -75,3 +76,39 @@ class UserService:
             return {"access_token": response["AuthenticationResult"]["AccessToken"]}
         except ClientError as e:
             raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    import boto3
+
+    @staticmethod
+    async def get_all_users() -> List[UserInDB]:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+
+        try:
+            response = users_table.scan()
+            users = response.get("Items", [])
+            return [UserInDB(**user) for user in users]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def delete_user(user_id: str):
+        cognito_client = boto3.client(
+            "cognito-idp",
+            region_name=settings.PRIVATE_AWS_REGION,
+        )
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+
+        try:
+            # Delete user from Cognito
+            cognito_client.admin_delete_user(
+                UserPoolId=settings.COGNITO_USER_POOL_ID, Username=user_id
+            )
+
+            # Delete user from DynamoDB
+            dynamodb_response = users_table.delete_item(Key={"user_id": user_id})
+
+            return {"message": f"User {user_id} deleted successfully"}
+        except ClientError as e:
+            raise HTTPException(status_code=400, detail=str(e))

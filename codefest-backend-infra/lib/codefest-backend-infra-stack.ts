@@ -1,8 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as path from 'path';
+import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as dotenv from 'dotenv';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -58,8 +59,19 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         PRIVATE_AWS_REGION,
         S3_BUCKET_NAME,
         API_KEY,
+        COGNITO_USER_POOL_ID,
+        COGNITO_APP_CLIENT_ID,
+        DYNAMODB_TABLE_NAME
       },
     });
+
+    apiFunction.role?.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoPowerUser')
+    );
+
+        // Grant DynamoDB permissions
+        const table = dynamodb.Table.fromTableName(this, 'ImportedTable', DYNAMODB_TABLE_NAME);
+        table.grantReadWriteData(apiFunction);
 
     // Add a function URL to the Lambda
     const functionUrl = apiFunction.addFunctionUrl({
