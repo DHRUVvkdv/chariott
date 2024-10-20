@@ -56,6 +56,14 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!DYNAMODB_TABLE_NAME_BOOKINGS) {
       throw new Error("DYNAMODB_TABLE_NAME_BOOKINGS environment variable is not set");
     }
+    const DYNAMODB_TABLE_NAME_HOTELS = process.env.DYNAMODB_TABLE_NAME_HOTELS;
+    if (!DYNAMODB_TABLE_NAME_HOTELS) {
+      throw new Error("DYNAMODB_TABLE_NAME_HOTELS environment variable is not set");
+    }
+    const DYNAMODB_TABLE_NAME_RAG_INTERACTIONS = process.env.DYNAMODB_TABLE_NAME_RAG_INTERACTIONS;
+    if (!DYNAMODB_TABLE_NAME_RAG_INTERACTIONS) {
+      throw new Error("DYNAMODB_TABLE_NAME_RAG_INTERACTIONS environment variable is not set");
+    }
     const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
     if (!PINECONE_API_KEY) {
       throw new Error("PINECONE_API_KEY environment variable is not set");
@@ -64,6 +72,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!PINECONE_INDEX_NAME) {
       throw new Error("PINECONE_INDEX_NAME environment variable is not set");
     }
+    
 
 
     // Create a Lambda function from a Docker image
@@ -87,7 +96,9 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         PINECONE_API_KEY,
         PINECONE_INDEX_NAME,
         DYNAMODB_TABLE_NAME_REQUESTS,
-        DYNAMODB_TABLE_NAME_BOOKINGS
+        DYNAMODB_TABLE_NAME_BOOKINGS,
+        DYNAMODB_TABLE_NAME_HOTELS,
+        DYNAMODB_TABLE_NAME_RAG_INTERACTIONS
       },
     });
 
@@ -108,20 +119,33 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         const table_bookings = dynamodb.Table.fromTableName(this, 'BookingsTable', DYNAMODB_TABLE_NAME_BOOKINGS);
         table_bookings.grantReadWriteData(apiFunction);
 
+        const table_hotels = dynamodb.Table.fromTableName(this, 'HotelsTable', DYNAMODB_TABLE_NAME_HOTELS);
+        table_hotels.grantReadWriteData(apiFunction)
+
+        const table_rag_interactions = dynamodb.Table.fromTableName(this, 'RagTable', DYNAMODB_TABLE_NAME_RAG_INTERACTIONS);
+        table_hotels.grantReadWriteData(apiFunction)
+
 
             // Grant additional permissions for GSI querying
-    apiFunction.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        'dynamodb:Query',
-        'dynamodb:Scan'
-      ],
-      resources: [
-        `${table_requests.tableArn}/index/*`,
-        `${table_users.tableArn}/index/*`,
-        `${table_processed_files.tableArn}/index/*`
-      ]
-    }));
+            apiFunction.addToRolePolicy(new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: [
+                'dynamodb:Query',
+                'dynamodb:Scan'
+              ],
+              resources: [
+                table_requests.tableArn,
+                table_users.tableArn,
+                table_processed_files.tableArn,
+                table_bookings.tableArn,
+                table_hotels.tableArn,
+                `${table_requests.tableArn}/index/*`,
+                `${table_users.tableArn}/index/*`,
+                `${table_processed_files.tableArn}/index/*`,
+                `${table_bookings.tableArn}/index/*`,
+                `${table_hotels.tableArn}/index/*`
+              ]
+            }));
 
     // Add a function URL to the Lambda
     const functionUrl = apiFunction.addFunctionUrl({

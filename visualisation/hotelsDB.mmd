@@ -1,0 +1,31 @@
+erDiagram
+    HOTEL {
+        string hotel_id PK
+        string chain_id
+        string name
+        int eco_rating
+        object location
+        object[] local_community_projects
+        object amenities
+    }
+    LOCATION {
+        string city
+        string state
+        string country
+    }
+    COMMUNITY_PROJECT {
+        string image_url
+        string title
+        string description
+    }
+    AMENITIES {
+        boolean breakfast
+        boolean bar
+        boolean room_service
+        boolean pet_friendly
+        boolean front_desk_24_7
+        boolean parking
+    }
+    HOTEL ||--|| LOCATION : has
+    HOTEL ||--|{ COMMUNITY_PROJECT : has
+    HOTEL ||--|| AMENITIES : has

@@ -7,6 +7,7 @@ from fastapi.openapi.utils import get_openapi
 from mangum import Mangum
 import logging
 from api.endpoints import booking
+from api.endpoints import hotel, rag_interaction
 
 
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +39,10 @@ app.add_middleware(AuthMiddleware)
 app.include_router(user.router, prefix="/api/auth", tags=["auth"])
 app.include_router(document.router, prefix="/api/documents", tags=["documents"])
 app.include_router(request.router, prefix="/api/requests", tags=["requests"])
-app.include_router(booking.router, prefix="/api/v1", tags=["bookings"])
+app.include_router(booking.router, prefix="/api/bookings", tags=["bookings"])
+app.include_router(hotel.router, prefix="/api/hotels", tags=["hotels"])
+app.include_router(rag_interaction.router, prefix="/api/rag", tags=["rag"])
+
 
 handler = Mangum(app)
 
