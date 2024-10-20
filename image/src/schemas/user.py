@@ -44,6 +44,13 @@ class RoomView(str, Enum):
     ANY = "any"
 
 
+class LoyaltyProgram(str, Enum):
+    PLATINUM = "platinum"
+    GOLD = "gold"
+    SILVER = "silver"
+    BRONZE = "bronze"
+
+
 class Preferences(BaseModel):
     dietary_restrictions: DietaryRestriction = DietaryRestriction.OTHER
     dietary_restrictions_other: Optional[str] = None
@@ -62,6 +69,7 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    loyalty_program: LoyaltyProgram
 
 
 class User(UserBase):
@@ -70,6 +78,7 @@ class User(UserBase):
     preferences: Preferences = Field(default_factory=Preferences)
     recommendations: List[str] = []
     interaction_counter: int = 0
+    loyalty_program: LoyaltyProgram
 
     @model_validator(mode="after")
     def validate_staff_type(self):
@@ -88,6 +97,7 @@ class UserCreate(BaseModel):
     user_type: UserType = UserType.NORMAL
     staff_type: Optional[StaffType] = None
     preferences: Preferences = Field(default_factory=Preferences)
+    loyalty_program: LoyaltyProgram = LoyaltyProgram.BRONZE
 
     @validator("staff_type")
     def validate_staff_type(cls, v, values):
