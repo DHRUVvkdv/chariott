@@ -6,6 +6,8 @@ from middleware.auth import AuthMiddleware
 from fastapi.openapi.utils import get_openapi
 from mangum import Mangum
 import logging
+from api.endpoints import booking
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,6 +38,7 @@ app.add_middleware(AuthMiddleware)
 app.include_router(user.router, prefix="/api/auth", tags=["auth"])
 app.include_router(document.router, prefix="/api/documents", tags=["documents"])
 app.include_router(request.router, prefix="/api/requests", tags=["requests"])
+app.include_router(booking.router, prefix="/api/v1", tags=["bookings"])
 
 handler = Mangum(app)
 

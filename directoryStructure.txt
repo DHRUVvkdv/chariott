@@ -4,7 +4,8 @@ codefest-backend-infra/
 │   │   ├── endpoints/
 │   │   │   ├── __init__.py
 │   │   │   ├── document.py
-│   │   │   ├── auth.py
+│   │   │   ├── request.py
+│   │   │   ├── user.py
 │   │   └── __init__.py
 │   ├── core/
 │   │   ├── __init__.py
@@ -16,6 +17,7 @@ codefest-backend-infra/
 │   ├── schemas/  # New directory for Pydantic models
 │   │   ├── __init__.py
 │   │   └── document.py
+│   │   └── request.py
 │   │   └── user.py
 │   ├── services/  # New directory for business logic
 │   │   ├── __init__.py
@@ -23,6 +25,7 @@ codefest-backend-infra/
 │   │   └── dynamodb_service.py
 │   │   ├── embedding_service.py
 │   │   ├── pinecone_service.py
+│   │   ├── request_service.py
 │   │   ├── s3_service.py
 │   │   └── user_service.py
 │   └── main.py

@@ -52,6 +52,10 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!DYNAMODB_TABLE_NAME_REQUESTS) {
       throw new Error("DYNAMODB_TABLE_NAME_REQUESTS environment variable is not set");
     }
+    const DYNAMODB_TABLE_NAME_BOOKINGS = process.env.DYNAMODB_TABLE_NAME_BOOKINGS;
+    if (!DYNAMODB_TABLE_NAME_BOOKINGS) {
+      throw new Error("DYNAMODB_TABLE_NAME_BOOKINGS environment variable is not set");
+    }
     const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
     if (!PINECONE_API_KEY) {
       throw new Error("PINECONE_API_KEY environment variable is not set");
@@ -82,7 +86,8 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         DYNAMODB_TABLE_NAME_PROCESSED_FILES,
         PINECONE_API_KEY,
         PINECONE_INDEX_NAME,
-        DYNAMODB_TABLE_NAME_REQUESTS
+        DYNAMODB_TABLE_NAME_REQUESTS,
+        DYNAMODB_TABLE_NAME_BOOKINGS
       },
     });
 

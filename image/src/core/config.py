@@ -11,10 +11,11 @@ class Settings(BaseSettings):
     COGNITO_APP_CLIENT_ID: str
     DYNAMODB_TABLE_NAME_USERS: str
     DYNAMODB_TABLE_NAME_PROCESSED_FILES: str
+    DYNAMODB_TABLE_NAME_REQUESTS: str
+    DYNAMODB_TABLE_NAME_BOOKINGS: str
     API_KEY: str
     PINECONE_API_KEY: str
     PINECONE_INDEX_NAME: str
-    DYNAMODB_TABLE_NAME_REQUESTS: str
 
     class Config:
         env_file = ".env"

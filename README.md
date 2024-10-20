@@ -31,3 +31,13 @@ mmdc -i userDB.mmd -o diagram.svg
 mmdc -i userDB.mmd -o diagram.png
 
 cdk synth?
+
+Date:
+{
+"user_id": "dhruv@example.com",
+"hotel_id": "courtyard",
+"room_number": "string",
+"start_date": "2024-10-20T12:00:00-04:00",
+"end_date": "2024-10-21T11:00:00-04:00",
+"hotel_name": "string"
+}
