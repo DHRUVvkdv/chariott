@@ -31,6 +31,18 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!API_KEY) {
       throw new Error("API_KEY environment variable is not set");
     }
+    const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
+    if (!COGNITO_USER_POOL_ID) {
+      throw new Error("COGNITO_USER_POOL_ID environment variable is not set");
+    }
+    const COGNITO_APP_CLIENT_ID = process.env.COGNITO_APP_CLIENT_ID;
+    if (!COGNITO_APP_CLIENT_ID) {
+      throw new Error("COGNITO_APP_CLIENT_ID environment variable is not set");
+    }
+    const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
+    if (!DYNAMODB_TABLE_NAME) {
+      throw new Error("DYNAMODB_TABLE_NAME environment variable is not set");
+    }
 
     // Create a Lambda function from a Docker image
     const apiFunction = new lambda.DockerImageFunction(this, 'ApiFunction', {

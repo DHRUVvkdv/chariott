@@ -4,6 +4,7 @@ codefest-backend-infra/
 │   │   ├── endpoints/
 │   │   │   ├── __init__.py
 │   │   │   ├── document.py
+│   │   │   ├── auth.py
 │   │   └── __init__.py
 │   ├── core/
 │   │   ├── __init__.py
@@ -15,6 +16,7 @@ codefest-backend-infra/
 │   ├── schemas/  # New directory for Pydantic models
 │   │   ├── __init__.py
 │   │   └── document.py
+│   │   └── user.py
 │   ├── services/  # New directory for business logic
 │   │   ├── __init__.py
 │   │   ├── s3_service.py
