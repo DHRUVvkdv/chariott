@@ -44,6 +44,19 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!DYNAMODB_TABLE_NAME_USERS) {
       throw new Error("DYNAMODB_TABLE_NAME_USERS environment variable is not set");
     }
+    const DYNAMODB_TABLE_NAME_PROCESSED_FILES = process.env.DYNAMODB_TABLE_NAME_PROCESSED_FILES;
+    if (!DYNAMODB_TABLE_NAME_PROCESSED_FILES) {
+      throw new Error("DYNAMODB_TABLE_NAME_PROCESSED_FILES environment variable is not set");
+    }
+    const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
+    if (!PINECONE_API_KEY) {
+      throw new Error("PINECONE_API_KEY environment variable is not set");
+    }
+    const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
+    if (!PINECONE_INDEX_NAME) {
+      throw new Error("PINECONE_INDEX_NAME environment variable is not set");
+    }
+
 
     // Create a Lambda function from a Docker image
     const apiFunction = new lambda.DockerImageFunction(this, 'ApiFunction', {
@@ -61,7 +74,10 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         API_KEY,
         COGNITO_USER_POOL_ID,
         COGNITO_APP_CLIENT_ID,
-        DYNAMODB_TABLE_NAME_USERS
+        DYNAMODB_TABLE_NAME_USERS,
+        DYNAMODB_TABLE_NAME_PROCESSED_FILES,
+        PINECONE_API_KEY,
+        PINECONE_INDEX_NAME,
       },
     });
 
@@ -70,13 +86,23 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     );
 
         // Grant DynamoDB permissions
-        const table = dynamodb.Table.fromTableName(this, 'ImportedTable', DYNAMODB_TABLE_NAME_USERS);
-        table.grantReadWriteData(apiFunction);
+        const table_users = dynamodb.Table.fromTableName(this, 'UsersTable', DYNAMODB_TABLE_NAME_USERS);
+        table_users.grantReadWriteData(apiFunction);
+    
+        const table_processed_files = dynamodb.Table.fromTableName(this, 'ProcessedFilesTable', DYNAMODB_TABLE_NAME_PROCESSED_FILES);
+        table_processed_files.grantReadWriteData(apiFunction);
 
     // Add a function URL to the Lambda
     const functionUrl = apiFunction.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // This makes it publicly accessible
     });
+
+    // Add Bedrock permissions
+    apiFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['bedrock:InvokeModel'],
+      resources: ['arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v1'],
+    }));
 
     // Output the Function URL
     new cdk.CfnOutput(this, 'FunctionUrl', {

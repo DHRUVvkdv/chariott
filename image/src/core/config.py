@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     DYNAMODB_TABLE_NAME_PROCESSED_FILES: str
     API_KEY: str
     PINECONE_API_KEY: str
-    PINECONE_ENVIRONMENT: str
     PINECONE_INDEX_NAME: str
 
     class Config:

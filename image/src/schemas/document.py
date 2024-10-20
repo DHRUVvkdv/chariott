@@ -13,3 +13,15 @@ class DocumentUploadResponse(BaseModel):
 
 class DocumentUploadError(BaseModel):
     error: str
+
+
+class DocumentListResponse(BaseModel):
+    file_name: str
+    status: str
+    s3_url: HttpUrl
+    user_id: str
+
+
+class DocumentResponse(DocumentListResponse):
+    chain_id: Optional[str] = None
+    hotel_id: Optional[str] = None
