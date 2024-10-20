@@ -123,7 +123,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         table_hotels.grantReadWriteData(apiFunction)
 
         const table_rag_interactions = dynamodb.Table.fromTableName(this, 'RagTable', DYNAMODB_TABLE_NAME_RAG_INTERACTIONS);
-        table_hotels.grantReadWriteData(apiFunction)
+        table_rag_interactions.grantReadWriteData(apiFunction)
 
 
             // Grant additional permissions for GSI querying
@@ -139,11 +139,13 @@ export class CodefestBackendInfraStack extends cdk.Stack {
                 table_processed_files.tableArn,
                 table_bookings.tableArn,
                 table_hotels.tableArn,
+                table_rag_interactions.tableArn,
                 `${table_requests.tableArn}/index/*`,
                 `${table_users.tableArn}/index/*`,
                 `${table_processed_files.tableArn}/index/*`,
                 `${table_bookings.tableArn}/index/*`,
-                `${table_hotels.tableArn}/index/*`
+                `${table_hotels.tableArn}/index/*`,
+                `${table_rag_interactions.tableArn}/index/*`
               ]
             }));
 
