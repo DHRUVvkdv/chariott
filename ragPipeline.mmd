@@ -1,0 +1,12 @@
+```
+graph TD
+    A[Frontend] -->|Upload Document| B[FastAPI Backend]
+    B -->|Store Document| C[S3 Storage]
+    B -->|Process Document| D[Document Processor]
+    D -->|Chunk Document| E[LangChain]
+    E -->|Generate Embeddings| F[Embedding Service]
+    F -->|Store Embeddings| G[Pinecone Vector DB]
+    B -->|Store Metadata| H[DynamoDB]
+    I[Bedrock/Claude] -->|AI Services| B
+    J[Multi-Agent System] -.->|Future Integration| B
+```
