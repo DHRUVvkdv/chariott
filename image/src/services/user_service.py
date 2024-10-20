@@ -14,7 +14,7 @@ class UserService:
             region_name=settings.PRIVATE_AWS_REGION,
         )
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         try:
             # Create user in Cognito
@@ -82,7 +82,7 @@ class UserService:
     @staticmethod
     async def get_all_users() -> List[UserInDB]:
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         try:
             response = users_table.scan()
@@ -98,7 +98,7 @@ class UserService:
             region_name=settings.PRIVATE_AWS_REGION,
         )
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         cognito_deleted = False
         dynamodb_deleted = False
@@ -133,7 +133,7 @@ class UserService:
     @staticmethod
     async def get_user(user_id: str) -> UserInDB:
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         try:
             response = users_table.get_item(Key={"user_id": user_id})
@@ -147,7 +147,7 @@ class UserService:
     @staticmethod
     async def get_all_staff() -> List[UserInDB]:
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         try:
             response = users_table.scan(
@@ -162,7 +162,7 @@ class UserService:
     @staticmethod
     async def get_all_normal() -> List[UserInDB]:
         dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
-        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
 
         try:
             response = users_table.scan(

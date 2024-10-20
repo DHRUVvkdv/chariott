@@ -21,6 +21,10 @@ codefest-backend-infra/
 │   │   ├── __init__.py
 │   │   ├── s3_service.py
 │   │   └── user_service.py
+│   │   ├── document_processor.py
+│   │   ├── embedding_service.py
+│   │   ├── pinecone_service.py
+│   │   └── dynamodb_service.py
 │   └── main.py
 ├── .env
 ├── .gitignore

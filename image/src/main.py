@@ -7,7 +7,7 @@ from mangum import Mangum
 import logging
 from api.endpoints import document, auth
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -31,6 +31,14 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
+app.add_middleware(AuthMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(document.router, prefix="/api/documents", tags=["documents"])
@@ -41,11 +49,6 @@ handler = Mangum(app)
 @app.get("/")
 async def read_root():
     return Response(status_code=302, headers={"Location": "/docs"})
-
-
-@app.get("/test")
-async def read_test():
-    return {"message": "hello world"}
 
 
 if __name__ == "__main__":

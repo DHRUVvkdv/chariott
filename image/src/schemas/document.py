@@ -7,6 +7,8 @@ class DocumentUploadResponse(BaseModel):
     hotel_id: Optional[str]
     document_name: str
     url: HttpUrl
+    user_id: str
+    processing_status: str = "completed"
 
 
 class DocumentUploadError(BaseModel):

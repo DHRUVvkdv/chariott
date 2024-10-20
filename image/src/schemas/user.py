@@ -41,9 +41,15 @@ class UserCreate(BaseModel):
 
 class UserInDB(UserBase):
     user_type: UserType
-    staff_type: StaffType | None = None
+    staff_type: Optional[StaffType] = None
 
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+# Add this new class
+class User(UserBase):
+    user_type: UserType
+    staff_type: Optional[StaffType] = None

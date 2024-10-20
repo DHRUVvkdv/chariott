@@ -40,9 +40,9 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     if (!COGNITO_APP_CLIENT_ID) {
       throw new Error("COGNITO_APP_CLIENT_ID environment variable is not set");
     }
-    const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
-    if (!DYNAMODB_TABLE_NAME) {
-      throw new Error("DYNAMODB_TABLE_NAME environment variable is not set");
+    const DYNAMODB_TABLE_NAME_USERS = process.env.DYNAMODB_TABLE_NAME_USERS;
+    if (!DYNAMODB_TABLE_NAME_USERS) {
+      throw new Error("DYNAMODB_TABLE_NAME_USERS environment variable is not set");
     }
 
     // Create a Lambda function from a Docker image
@@ -61,7 +61,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         API_KEY,
         COGNITO_USER_POOL_ID,
         COGNITO_APP_CLIENT_ID,
-        DYNAMODB_TABLE_NAME
+        DYNAMODB_TABLE_NAME_USERS
       },
     });
 
@@ -70,7 +70,7 @@ export class CodefestBackendInfraStack extends cdk.Stack {
     );
 
         // Grant DynamoDB permissions
-        const table = dynamodb.Table.fromTableName(this, 'ImportedTable', DYNAMODB_TABLE_NAME);
+        const table = dynamodb.Table.fromTableName(this, 'ImportedTable', DYNAMODB_TABLE_NAME_USERS);
         table.grantReadWriteData(apiFunction);
 
     // Add a function URL to the Lambda

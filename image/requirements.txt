@@ -7,3 +7,7 @@ python-multipart
 boto3
 python-dotenv
 email-validator
+langchain
+pinecone
+pypdf
+langchain-community
