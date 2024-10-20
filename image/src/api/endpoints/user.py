@@ -59,3 +59,13 @@ async def get_preferences(user_id: str):
 @router.get("/users/{user_id}/interaction-counter")
 async def get_interaction_counter(user_id: str):
     return {"interaction_counter": await UserService.get_interaction_counter(user_id)}
+
+
+@router.get("/users/{user_id}/recommendations", response_model=List[str])
+async def get_recommendations(user_id: str):
+    return await UserService.get_recommendations(user_id)
+
+
+@router.put("/users/{user_id}/recommendations", response_model=List[str])
+async def update_recommendations(user_id: str, recommendations: List[str]):
+    return await UserService.update_recommendations(user_id, recommendations)

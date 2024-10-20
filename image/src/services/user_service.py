@@ -55,6 +55,7 @@ class UserService:
             dynamodb_item = user.dict(exclude={"password"})
             dynamodb_item["user_id"] = user.email  # Use email as user_id
             dynamodb_item["interaction_counter"] = 0
+            dynamodb_item["recommendations"] = []
             if user.user_type == UserType.STAFF:
                 dynamodb_item["staff_type"] = user.staff_type.value
 
@@ -252,5 +253,39 @@ class UserService:
                 )
             await UserService.increment_interaction_counter(user_id)
             return user["interaction_counter"]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def get_recommendations(user_id: str) -> List[str]:
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.get_item(Key={"user_id": user_id})
+            user = response.get("Item")
+            if not user or "recommendations" not in user:
+                raise HTTPException(
+                    status_code=404, detail="User or recommendations not found"
+                )
+            await UserService.increment_interaction_counter(user_id)
+            return user["recommendations"]
+        except ClientError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def update_recommendations(user_id: str, recommendations: List[str]):
+        dynamodb = boto3.resource("dynamodb", region_name=settings.PRIVATE_AWS_REGION)
+        users_table = dynamodb.Table(settings.DYNAMODB_TABLE_NAME_USERS)
+
+        try:
+            response = users_table.update_item(
+                Key={"user_id": user_id},
+                UpdateExpression="SET recommendations = :recommendations",
+                ExpressionAttributeValues={":recommendations": recommendations},
+                ReturnValues="UPDATED_NEW",
+            )
+            await UserService.increment_interaction_counter(user_id)
+            return response["Attributes"]["recommendations"]
         except ClientError as e:
             raise HTTPException(status_code=500, detail=str(e))
