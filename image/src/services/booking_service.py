@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
 from core.config import settings
-from schemas.booking import BookingCreate, BookingUpdate
+from schemas.booking import BookingCreate, BookingUpdate, RoomInfo
 from utils.utils import get_current_est_time, format_est_datetime, parse_est_datetime
 from uuid import uuid4
 from datetime import datetime
@@ -21,6 +21,7 @@ class BookingService:
             **booking.dict(),
             "start_date": format_est_datetime(booking.start_date),
             "end_date": format_est_datetime(booking.end_date),
+            "room_info": booking.room_info.dict(),
         }
         try:
             table.put_item(Item=item)
@@ -35,9 +36,10 @@ class BookingService:
             item = response.get("Item")
             if not item:
                 raise HTTPException(status_code=404, detail="Booking not found")
-            # Convert string dates back to datetime objects
             item["start_date"] = parse_est_datetime(item["start_date"])
             item["end_date"] = parse_est_datetime(item["end_date"])
+            if "room_info" in item:
+                item["room_info"] = RoomInfo(**item["room_info"])
             return item
         except ClientError as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -102,12 +104,23 @@ class BookingService:
         expression_attribute_names = {}
 
         for field, value in booking_update.dict(exclude_unset=True).items():
-            update_expression += f"#{field} = :{field}, "
-            if isinstance(value, datetime):
-                expression_attribute_values[f":{field}"] = format_est_datetime(value)
+            if field == "room_info" and value is not None:
+                for room_field, room_value in value.items():
+                    update_expression += (
+                        f"#room_info.#{room_field} = :room_{room_field}, "
+                    )
+                    expression_attribute_values[f":room_{room_field}"] = room_value
+                    expression_attribute_names[f"#{room_field}"] = room_field
+                expression_attribute_names["#room_info"] = "room_info"
             else:
-                expression_attribute_values[f":{field}"] = value
-            expression_attribute_names[f"#{field}"] = field
+                update_expression += f"#{field} = :{field}, "
+                if isinstance(value, datetime):
+                    expression_attribute_values[f":{field}"] = format_est_datetime(
+                        value
+                    )
+                else:
+                    expression_attribute_values[f":{field}"] = value
+                expression_attribute_names[f"#{field}"] = field
 
         update_expression = update_expression.rstrip(", ")
 
@@ -120,13 +133,14 @@ class BookingService:
                 ReturnValues="ALL_NEW",
             )
             updated_item = response.get("Attributes", {})
-            # Convert string dates back to datetime objects
             if "start_date" in updated_item:
                 updated_item["start_date"] = parse_est_datetime(
                     updated_item["start_date"]
                 )
             if "end_date" in updated_item:
                 updated_item["end_date"] = parse_est_datetime(updated_item["end_date"])
+            if "room_info" in updated_item:
+                updated_item["room_info"] = RoomInfo(**updated_item["room_info"])
             return updated_item
         except ClientError as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -145,12 +159,13 @@ class BookingService:
             response = table.scan()
             items = response.get("Items", [])
 
-            # Convert string dates back to datetime objects for all items
             for item in items:
                 if "start_date" in item:
                     item["start_date"] = parse_est_datetime(item["start_date"])
                 if "end_date" in item:
                     item["end_date"] = parse_est_datetime(item["end_date"])
+                if "room_info" in item:
+                    item["room_info"] = RoomInfo(**item["room_info"])
 
             return items
         except ClientError as e:

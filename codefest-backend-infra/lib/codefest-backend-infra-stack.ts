@@ -105,6 +105,9 @@ export class CodefestBackendInfraStack extends cdk.Stack {
         const table_requests = dynamodb.Table.fromTableName(this, 'RequestsTable', DYNAMODB_TABLE_NAME_REQUESTS);
         table_requests.grantReadWriteData(apiFunction);
 
+        const table_bookings = dynamodb.Table.fromTableName(this, 'BookingsTable', DYNAMODB_TABLE_NAME_BOOKINGS);
+        table_bookings.grantReadWriteData(apiFunction);
+
 
             // Grant additional permissions for GSI querying
     apiFunction.addToRolePolicy(new iam.PolicyStatement({

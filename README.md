@@ -41,3 +41,17 @@ Date:
 "end_date": "2024-10-21T11:00:00-04:00",
 "hotel_name": "string"
 }
+
+{
+"user_id": "dhruv@example.com",
+"hotel_id": "courtyard",
+"room_number": "111",
+"start_date": "2024-10-20T12:00:00-04:00",
+"end_date": "2024-10-21T11:00:00-04:00",
+"hotel_name": "acha",
+"room_info": {
+"beds": 2,
+"bathrooms": 1,
+"size": "king"
+}
+}
